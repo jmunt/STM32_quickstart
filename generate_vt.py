@@ -3,8 +3,8 @@ import sys
 
 # Don't run the script if the wrong # of arguments are passed in.
 if not len( sys.argv ) == 3:
-  print( 'Usage: python generate_vt.py <MCU_class> <MCU_core>\n' +
-         'Example: python generate_vt.py STM32WBxx cortex-m4' )
+  print( 'Usage: python generate_vt.py <MCU_DEF> <MCU_core>\n' +
+         'Example: python generate_vt.py STM32WB55xx cortex-m4' )
   sys.exit( 1 )
 
 # Array to hold relevant lines in the device header file.
@@ -36,6 +36,7 @@ irq_dict = { }
 # line into a (key, value) pair in the 'irq_dict' variable.
 for line in irq_lines:
   if '=' in line:
+    line = line.replace('\t', ' ')
     while '  ' in line:
       line = line.replace( '  ', ' ' )
     line = line.replace( ',', '' )
@@ -84,8 +85,8 @@ with open( vt_fn, 'w+' ) as vt_as:
   # define an interrupt handler in their program.
   for i in range( irq_list[ 0 ][ 0 ], ( irq_list[ -1 ][ 0 ] + 1 ) ):
     if i in irq_dict:
-      vt_as.write( '  .weak ' + irq_dict[ i ] + '_handler\n' )
-      vt_as.write( '  .thumb_set ' + irq_dict[ i ] + '_handler,default_interrupt_handler\n' )
+      vt_as.write( ('  .weak ').ljust(14) + irq_dict[ i ] + '_handler\n' )
+      vt_as.write( ('  .thumb_set ').ljust(14) + irq_dict[ i ] + '_handler,default_interrupt_handler\n\n' )      
 
   # Close the definition of the vector table.
   vt_as.write( '.size vtable, .-vtable\n\n' )
